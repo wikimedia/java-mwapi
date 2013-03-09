@@ -29,8 +29,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import com.sun.jmx.snmp.SnmpString;
-
 import in.yuvi.http.fluent.ProgressListener;
 
 public class MWApiTest {
