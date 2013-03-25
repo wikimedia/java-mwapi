@@ -35,6 +35,11 @@
             <email>yuvipanda@gmail.com</email>
             <timezone>0530</timezone>
         </developer>
+        <developer>
+          <id>edouardhue</id>
+          <name>Édouard Hue</name>
+          <email>edouard.hue@gmail.com</email>
+        </developer>
     </developers>
 
     <scm>
@@ -73,8 +78,8 @@
                     <version>2.3.2</version>
                     <inherited>true</inherited>
                     <configuration>
-                        <source>1.5</source>
-                        <target>1.5</target>
+                        <source>1.6</source>
+                        <target>1.6</target>
                     </configuration>
                 </plugin>
             </plugins>
