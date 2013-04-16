@@ -68,23 +68,27 @@ public class MWApiTest {
             throw new RuntimeException(e);
         }
         FileInputStream fis = new FileInputStream(filepath);
-        byte[] dataBytes = new byte[1024];
-     
-        int nread = 0; 
-     
-        while ((nread = fis.read(dataBytes)) != -1) {
-          md.update(dataBytes, 0, nread);
-        };
-     
-        byte[] mdbytes = md.digest();
-     
-        //convert the byte to hex format
-        StringBuffer sb = new StringBuffer("");
-        for (int i = 0; i < mdbytes.length; i++) {
-            sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+        try {
+          byte[] dataBytes = new byte[1024];
+       
+          int nread = 0; 
+       
+          while ((nread = fis.read(dataBytes)) != -1) {
+            md.update(dataBytes, 0, nread);
+          };
+       
+          byte[] mdbytes = md.digest();
+       
+          //convert the byte to hex format
+          StringBuffer sb = new StringBuffer("");
+          for (int i = 0; i < mdbytes.length; i++) {
+              sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+          }
+          
+          return sb.toString();
+        } finally {
+          fis.close();
         }
-        
-        return sb.toString();
     }
     
     @Test
@@ -133,7 +137,7 @@ public class MWApiTest {
         long length = countBytes(streamForCounting);
         
         ArrayList<Double> progressValues = new ArrayList<Double>();
-        ApiResult result = api.upload("test", stream, length, "yo!", "Wassup?", new ArrayListOutputProgressListener(progressValues));
+        ApiResult result = api.upload("test", stream, length, "yo!", "Wassup?", false, new ArrayListOutputProgressListener(progressValues));
         assertEquals(sha1Of(filepath), result.getString("/api/upload/imageinfo/@sha1"));
         
         // TODO: Very simple check, do something a lot more complete
