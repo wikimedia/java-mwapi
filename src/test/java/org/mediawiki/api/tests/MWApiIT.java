@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.mediawiki.api.ApiResult;
 import org.mediawiki.api.MWApi;
 
-public class MWApiTest {
+public class MWApiIT {
 
     // Test accounts on local wiki. For write tests
     // Setup your local wiki and create this account before running tests
