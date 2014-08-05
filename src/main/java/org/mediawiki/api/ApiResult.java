@@ -17,6 +17,7 @@ package org.mediawiki.api;
 import in.yuvi.http.fluent.Http.HttpRequestBuilder;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -56,8 +57,12 @@ public class ApiResult {
 
     static ApiResult fromRequestBuilder(HttpRequestBuilder builder, HttpClient client) throws IOException {
         try {
-            Document doc = DOC_BUILDER.parse(builder.use(client).charset("utf-8").data("format", "xml").asResponse().getEntity().getContent());
-            return new ApiResult(doc);
+          final InputStream content = builder.use(client).charset("utf-8").data("format", "xml").asResponse().getEntity().getContent();
+          final Document doc;
+          synchronized (DOC_BUILDER) {
+            doc = DOC_BUILDER.parse(content);
+          }
+          return new ApiResult(doc);
         } catch (final SAXException e) {
           throw new QueryResultException("Could not parse result", e);
         }
