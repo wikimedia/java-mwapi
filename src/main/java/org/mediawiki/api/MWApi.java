@@ -57,6 +57,7 @@ public class MWApi {
     private String authCookie = null;
     private String userName = null;
     private String userID = null;
+    private String editToken = null;
 
     public MWApi(String apiURL, AbstractHttpClient client) {
         this.apiURL = apiURL;
@@ -147,16 +148,20 @@ public class MWApi {
     }
     
     public ApiResult upload(String filename, InputStream file, long length, String text, String comment, boolean watch, ProgressListener uploadProgressListener) throws IOException {
-        String token = this.getEditToken();
+        String token = this.getEditToken(false);
         HttpRequestBuilder builder = Http.multipart(apiURL)
                 .data("action", "upload")
                 .data("token", token)
                 .data("text", text)
                 .data("ignorewarnings", "1")
                 .data("comment", comment)
-                .data("watch", watch ? "1" : "0")
                 .data("filename", filename)
                 .sendProgressListener(uploadProgressListener);
+        if (watch) {
+          builder.data("watchlist", "watch");
+        } else {
+          builder.data("watchlist", "nochange");
+        }
         if(length != -1) {
                 builder.file("file", filename, file, length);
         } else {
@@ -172,8 +177,17 @@ public class MWApi {
     }
 
     public String getEditToken() throws IOException {
-        ApiResult result = this.action("tokens").param("type", "edit").get();
-        return result.getString("/api/tokens/@edittoken");
+      return this.getEditToken(true);
+    }
+
+    public String getEditToken(final boolean renew) throws IOException {
+        synchronized (this) {
+          if (renew || this.editToken == null) {
+            ApiResult result = this.action("tokens").param("type", "edit").get();
+            this.editToken = result.getString("/api/tokens/@edittoken");
+          }
+          return editToken;
+        }
     }
 
     private ApiResult makeRequest(String method, HashMap<String, Object> params) throws IOException {
