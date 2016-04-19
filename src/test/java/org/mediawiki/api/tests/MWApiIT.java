@@ -53,9 +53,9 @@ public class MWApiIT {
         setupWriteableAPI();
         // Login, check token, logout, check token
         assertEquals("Success", api.login(USERNAME, PASSWORD));
-        assertFalse("+\\".equals(api.getEditToken()));
+        assertFalse("+\\".equals(api.getCsrfToken()));
         api.logout();
-        assertEquals("+\\", api.getEditToken());
+        assertEquals("+\\", api.getCsrfToken());
     }
    
     // <Insert profanity about Java>
@@ -159,11 +159,11 @@ public class MWApiIT {
         // reset API
         setupWriteableAPI();
         assertFalse(api.validateLogin());
-        assertEquals("+\\", api.getEditToken());
+        assertEquals("+\\", api.getCsrfToken());
         api.setAuthCookie(authCookie);
         assertEquals(authCookie, api.getAuthCookie());
         assertTrue(api.validateLogin());
-        assertFalse("+\\".equals(api.getEditToken()));
+        assertFalse("+\\".equals(api.getCsrfToken()));
     }
     
     @Test
@@ -178,7 +178,7 @@ public class MWApiIT {
     public void testLoggedInEditAttempt() throws IOException {
         setupWriteableAPI();
         assertEquals("Success", api.login(USERNAME, PASSWORD));
-        String token = api.getEditToken();
+        String token = api.getCsrfToken();
         String text = "Has anyone really been far even as decided to use even go want to do look more like?";
         String title = "India";
         ApiResult editResult = api.action("edit").param("title", title).param("text", text).param("token", token).param("summary", "Sample summary").post();
@@ -190,7 +190,7 @@ public class MWApiIT {
     @Test
     public void testAnonymousEditToken() throws IOException {
         // +\ is anonymous edit token
-        assertEquals("+\\", api.getEditToken());
+        assertEquals("+\\", api.getCsrfToken());
     }
 
 }
