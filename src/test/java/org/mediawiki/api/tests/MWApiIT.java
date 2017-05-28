@@ -1,11 +1,11 @@
 package org.mediawiki.api.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
 import in.yuvi.http.fluent.ProgressListener;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.Before;
+import org.junit.Test;
+import org.mediawiki.api.ApiResult;
+import org.mediawiki.api.MWApi;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,11 +14,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.Before;
-import org.junit.Test;
-import org.mediawiki.api.ApiResult;
-import org.mediawiki.api.MWApi;
+import static org.junit.Assert.*;
 
 public class MWApiIT {
 
@@ -35,11 +31,11 @@ public class MWApiIT {
 
     @Before
     public void setUp() {
-        api = new MWApi(READAPIURL, new DefaultHttpClient());
+        api = new MWApi(READAPIURL, HttpClientBuilder.create().build());
     }
 
     private void setupWriteableAPI() {
-        api = new MWApi(WRITEAPIURL, new DefaultHttpClient());
+        api = new MWApi(WRITEAPIURL, HttpClientBuilder.create().build());
     }
 
     @Test
@@ -150,22 +146,6 @@ public class MWApiIT {
         }
     }
 
-    @Test
-    public void testAuthCookieLogin() throws IOException {
-        setupWriteableAPI();
-        assertEquals("Success", api.login(USERNAME, PASSWORD));
-        String authCookie = api.getAuthCookie();
-        assertNotNull(authCookie);
-        // reset API
-        setupWriteableAPI();
-        assertFalse(api.validateLogin());
-        assertEquals("+\\", api.getCsrfToken());
-        api.setAuthCookie(authCookie);
-        assertEquals(authCookie, api.getAuthCookie());
-        assertTrue(api.validateLogin());
-        assertFalse("+\\".equals(api.getCsrfToken()));
-    }
-    
     @Test
     public void testValidateLogin() throws IOException {
         setupWriteableAPI();
