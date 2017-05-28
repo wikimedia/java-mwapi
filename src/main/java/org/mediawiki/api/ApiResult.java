@@ -14,12 +14,19 @@
  */
 package org.mediawiki.api;
 
-import java.io.IOError;
+import in.yuvi.http.fluent.Http.HttpRequestBuilder;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
-import javax.xml.parsers.*;
-import javax.xml.xpath.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.http.client.HttpClient;
 import org.w3c.dom.Document;
@@ -27,10 +34,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import in.yuvi.http.fluent.Http.HttpRequestBuilder;
-
 public class ApiResult {
+    
+    private static final DocumentBuilder DOC_BUILDER;
+    static {
+      final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+      try {
+        DOC_BUILDER = docBuilderFactory.newDocumentBuilder();
+      } catch (final ParserConfigurationException e) {
+        throw new Error("Could not create a document builder", e);
+      }
+    }
+    
     private Node doc;
+    
     private XPath evaluator;
 
     ApiResult(Node doc) {
@@ -40,22 +57,14 @@ public class ApiResult {
 
     static ApiResult fromRequestBuilder(HttpRequestBuilder builder, HttpClient client) throws IOException {
         try {
-            DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = docBuilder.parse(builder.use(client).charset("utf-8").data("format", "xml").asResponse().getEntity().getContent());
-            return new ApiResult(doc);
-        } catch (ParserConfigurationException e) {
-            // I don't know wtf I can do about this on...
-            throw new RuntimeException(e);
-        } catch (IllegalStateException e) {
-            // So, this should never actually happen - since we assume MediaWiki always generates valid json
-            // So the only thing causing this would be a network truncation
-            // Sooo... I can throw IOError
-            // Thanks Java, for making me spend significant time on shit that happens once in a bluemoon
-            // I surely am writing Nuclear Submarine controller code
-            throw new IOError(e);
-        } catch (SAXException e) {
-            // See Rant above
-            throw new IOError(e);
+          final InputStream content = builder.use(client).charset("utf-8").data("format", "xml").asResponse().getEntity().getContent();
+          final Document doc;
+          synchronized (DOC_BUILDER) {
+            doc = DOC_BUILDER.parse(content);
+          }
+          return new ApiResult(doc);
+        } catch (final SAXException e) {
+          throw new QueryResultException("Could not parse result", e);
         }
     }
     public Node getDocument() {
