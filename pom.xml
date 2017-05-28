@@ -5,7 +5,7 @@
 
     <groupId>org.mediawiki</groupId>
     <artifactId>api</artifactId>
-    <version>1.6_comeon-SNAPSHOT</version>
+    <version>1.6_comeon</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
